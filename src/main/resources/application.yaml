@@ -1,0 +1,98 @@
+spring:
+  application:
+    name: api-service  # 통합된 애플리케이션 이름
+  
+  config:
+    import: "optional:configserver:"
+  
+  # Redis 연결 설정 (WebMVC 환경)
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      # SSL 설정 (Upstash 사용 시 필수)
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
+
+# ========================================
+# Server 설정
+# ========================================
+server:
+  port: 8080
+
+# ========================================
+# CORS 설정 (WebMVC)
+# ========================================
+# WebMVC에서 CORS는 @CrossOrigin 또는 WebMvcConfigurer로 처리
+# 또는 Filter를 통해 처리
+
+# ========================================
+# Actuator 설정 (모니터링)
+# ========================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# ========================================
+# SpringDoc OpenAPI 설정 (WebMVC)
+# ========================================
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /docs
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    use-root-path: false
+    persist-authorization: true
+  show-actuator: false
+  default-flat-param-object: true
+  writer-with-order-by-keys: true
+
+# ========================================
+# Google OAuth 설정 (oauthservice 통합)
+# ========================================
+google:
+  client-id: ${GOOGLE_CLIENT_ID}
+  client-secret: ${GOOGLE_CLIENT_SECRET}
+  redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/api/oauth/google/callback}
+  # 로그인 성공 후 이동할 프론트엔드 주소 (www.elianayesol.com)
+  frontend-redirect-uri: ${GOOGLE_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/google/callback}
+
+# ========================================
+# JWT 설정 (oauthservice 통합)
+# ========================================
+jwt:
+  secret: ${JWT_SECRET:your-super-secret-jwt-key-at-least-256-bits-long-for-hs256-algorithm-please-change-this-in-production}
+  expiration: ${JWT_EXPIRATION:86400000}  # 24시간 (밀리초)
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:2592000000}  # 30일 (밀리초)
+
+# ========================================
+# Logging Configuration
+# ========================================
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    # 통합된 서비스들 로깅
+    com.elianayesol.api: DEBUG
+    com.elianayesol.api.oauthservice: DEBUG
+    com.elianayesol.api.user: INFO
+    com.elianayesol.api.common: INFO
+    com.elianayesol.api.environment: INFO
+    com.elianayesol.api.social: INFO
+    com.elianayesol.api.governance: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
