@@ -36,7 +36,7 @@ public class GoogleAuthService {
 	}
 
 	/**
-	 * Generate Google Auth URL
+	 * Generate Google Auth URL 구글 로그인 URL 생성
 	 */
 	public String generateAuthUrl() {
 		// Generate state parameter (CSRF protection)
