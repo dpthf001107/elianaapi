@@ -1,4 +1,4 @@
-package com.elianayesol.api.oauthservice.jwt;
+package com.elianayesol.api.services.oauthservice.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

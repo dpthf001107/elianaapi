@@ -1,0 +1,31 @@
+services:
+  # ========================================
+  # Spring Boot API Service
+  # Upstash Redis 사용 (클라우드)
+  # ========================================
+  api-service:
+    image: dpthf001107/api-elianayesol-com:v1
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    # container_name: api-service
+    ports:
+      - "8080:8080"
+    env_file:
+      - ../.env
+    networks:
+      - api-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# ========================================
+# Networks
+# ========================================
+networks:
+  api-network:
+    driver: bridge

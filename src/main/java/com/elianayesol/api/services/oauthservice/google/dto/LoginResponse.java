@@ -1,4 +1,4 @@
-package com.elianayesol.api.oauthservice.google.dto;
+package com.elianayesol.api.services.oauthservice.google.dto;
 
 import java.util.Map;
 

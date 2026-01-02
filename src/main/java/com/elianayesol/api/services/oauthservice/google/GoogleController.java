@@ -1,13 +1,14 @@
-package com.elianayesol.api.oauthservice.google;
+package com.elianayesol.api.services.oauthservice.google;
 
-import com.elianayesol.api.oauthservice.google.dto.GoogleUserInfo;
-import com.elianayesol.api.oauthservice.google.dto.LoginResponse;
-import com.elianayesol.api.oauthservice.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+
+import com.elianayesol.api.services.oauthservice.google.dto.GoogleUserInfo;
+import com.elianayesol.api.services.oauthservice.google.dto.LoginResponse;
+import com.elianayesol.api.services.oauthservice.jwt.JwtTokenProvider;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

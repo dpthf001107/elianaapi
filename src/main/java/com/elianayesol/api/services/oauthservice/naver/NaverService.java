@@ -1,4 +1,4 @@
-package com.elianayesol.api.oauthservice.naver;
+package com.elianayesol.api.services.oauthservice.naver;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,13 +8,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import com.elianayesol.api.services.oauthservice.jwt.JwtTokenProvider;
+import com.elianayesol.api.services.oauthservice.naver.dto.NaverTokenResponse;
+import com.elianayesol.api.services.oauthservice.naver.dto.NaverUserInfo;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.elianayesol.api.oauthservice.jwt.JwtTokenProvider;
-import com.elianayesol.api.oauthservice.naver.dto.NaverTokenResponse;
-import com.elianayesol.api.oauthservice.naver.dto.NaverUserInfo;
 
 import java.util.HashMap;
 import java.util.Map;

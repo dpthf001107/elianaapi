@@ -1,4 +1,4 @@
-package com.elianayesol.api.oauthservice.naver;
+package com.elianayesol.api.services.oauthservice.kakao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,90 +7,84 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.elianayesol.api.oauthservice.naver.NaverService.OAuthUserResponse;
+
+import com.elianayesol.api.services.oauthservice.kakao.KakaoService.OAuthUserResponse;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/oauth/naver")
+@RequestMapping("/api/oauth/kakao")
 @RequiredArgsConstructor
 @Slf4j
-public class NaverController {
-    private final NaverService naverService;
+public class KakaoController {
+    private final KakaoService kakaoService;
     
-    @Value("${naver.client-id:}")
+    @Value("${kakao.client-id:}")
     private String clientId;
     
-    @Value("${naver.redirect-uri:}")
+    @Value("${kakao.redirect-uri:}")
     private String redirectUri;
     
-    @Value("${naver.authorize-uri:https://nid.naver.com/oauth2.0/authorize}")
+    @Value("${kakao.authorize-uri:https://kauth.kakao.com/oauth/authorize}")
     private String authorizeUri;
     
-    @Value("${naver.frontend-redirect-uri:http://localhost:3000/oauth/naver/callback}")
+    @Value("${kakao.frontend-redirect-uri:http://localhost:3000/oauth/kakao/callback}")
     private String frontendRedirectUri;
 
     /**
-     * 네이버 로그인 URL 생성
-     * GET /naver/login
+     * 카카오 로그인 URL 생성
+     * GET /kakao/login
      */
     @GetMapping("/login")
-    public ResponseEntity<Map<String, String>> getNaverLoginUrl() {
+    public ResponseEntity<Map<String, String>> getKakaoLoginUrl() {
         try {
             // Validate configuration
             if (clientId == null || clientId.isEmpty()) {
-                log.error("NAVER_CLIENT_ID is not configured");
+                log.error("KAKAO_CLIENT_ID is not configured");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(Map.of("error", "Naver OAuth is not properly configured. Please set naver.client-id."));
+                        .body(Map.of("error", "Kakao OAuth is not properly configured. Please set kakao.client-id."));
             }
 
             if (redirectUri == null || redirectUri.isEmpty()) {
-                log.error("NAVER_REDIRECT_URI is not configured");
+                log.error("KAKAO_REDIRECT_URI is not configured");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(Map.of("error", "Naver redirect URI is not configured."));
+                        .body(Map.of("error", "Kakao redirect URI is not configured."));
             }
 
-            // State 파라미터 생성 (CSRF 방지)
-            String state = UUID.randomUUID().toString();
-
-            log.info("Generating Naver login URL with client_id: {}, redirect_uri: {}",
+            log.info("Generating Kakao login URL with client_id: {}, redirect_uri: {}",
                     clientId.substring(0, Math.min(4, clientId.length())) + "...",
                     redirectUri);
 
             String loginUrl = UriComponentsBuilder
                     .fromUriString(authorizeUri)
-                    .queryParam("response_type", "code")
                     .queryParam("client_id", clientId)
                     .queryParam("redirect_uri", redirectUri)
-                    .queryParam("state", state)
+                    .queryParam("response_type", "code")
                     .build()
                     .toUriString();
 
-            log.info("Generated Naver login URL: {}", loginUrl.replaceAll("client_id=[^&]+", "client_id=***"));
+            log.info("Generated Kakao login URL: {}", loginUrl.replaceAll("client_id=[^&]+", "client_id=***"));
             return ResponseEntity.ok(Map.of("authUrl", loginUrl));
         } catch (Exception e) {
-            log.error("Error generating Naver login URL", e);
+            log.error("Error generating Kakao login URL", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to generate login URL: " + e.getMessage()));
         }
     }
 
     /**
-     * 네이버 로그인 콜백 처리
-     * GET /naver/callback?code=AUTHORIZATION_CODE&state=STATE
+     * 카카오 로그인 콜백 처리
+     * GET /kakao/callback?code=AUTHORIZATION_CODE
      * 토큰을 생성한 후 프론트엔드로 리다이렉트
      */
     @GetMapping("/callback")
-    public ResponseEntity<?> naverCallback(
-            @RequestParam(required = false) String code,
-            @RequestParam(required = false) String state) {
+    public ResponseEntity<?> kakaoCallback(@RequestParam(required = false) String code) {
 
         // code 파라미터 검증
         if (code == null || code.isEmpty()) {
-            log.error("Naver callback: code parameter is missing");
+            log.error("Kakao callback: code parameter is missing");
             String redirectUrl = UriComponentsBuilder.fromUriString(frontendRedirectUri)
                     .queryParam("error", URLEncoder.encode("인증 코드가 없습니다.", StandardCharsets.UTF_8))
                     .build()
@@ -101,9 +95,9 @@ public class NaverController {
         }
 
         try {
-            log.info("Processing Naver login with code: {}", code.substring(0, Math.min(10, code.length())) + "...");
+            log.info("Processing Kakao login with code: {}", code.substring(0, Math.min(10, code.length())) + "...");
 
-            OAuthUserResponse response = naverService.processNaverLogin(code, state);
+            OAuthUserResponse response = kakaoService.processKakaoLogin(code);
             OAuthUserResponse.UserInfo userInfo = response.getUser();
 
             if (response == null || response.getAccessToken() == null) {
@@ -126,8 +120,9 @@ public class NaverController {
                 if (userInfo.getNickname() != null) {
                     builder.queryParam("nickname", URLEncoder.encode(userInfo.getNickname(), StandardCharsets.UTF_8));
                 }
-                if (userInfo.getName() != null) {
-                    builder.queryParam("name", URLEncoder.encode(userInfo.getName(), StandardCharsets.UTF_8));
+                if (userInfo.getProfileImage() != null) {
+                    builder.queryParam("profileImage",
+                            URLEncoder.encode(userInfo.getProfileImage(), StandardCharsets.UTF_8));
                 }
                 if (userInfo.getProvider() != null) {
                     builder.queryParam("provider", URLEncoder.encode(userInfo.getProvider(), StandardCharsets.UTF_8));
@@ -141,7 +136,7 @@ public class NaverController {
                     .header("Location", redirectUrl)
                     .build();
         } catch (Exception e) {
-            log.error("Naver login failed with error: {}", e.getMessage(), e);
+            log.error("Kakao login failed with error: {}", e.getMessage(), e);
             // 에러 발생 시 프론트엔드로 리다이렉트하면서 에러 메시지 전달
             String errorMessage = "로그인 처리 중 오류가 발생했습니다: " + e.getMessage();
             if (errorMessage.length() > 200) {

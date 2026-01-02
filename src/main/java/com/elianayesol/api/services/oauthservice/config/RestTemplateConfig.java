@@ -1,4 +1,4 @@
-package com.elianayesol.api.oauthservice.config;
+package com.elianayesol.api.services.oauthservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

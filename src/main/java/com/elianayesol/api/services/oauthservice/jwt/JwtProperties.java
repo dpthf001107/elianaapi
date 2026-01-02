@@ -1,4 +1,4 @@
-package com.elianayesol.api.oauthservice.jwt;
+package com.elianayesol.api.services.oauthservice.jwt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.elianayesol.api.oauthservice.kakao;
+package com.elianayesol.api.services.oauthservice.kakao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,13 +8,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import com.elianayesol.api.services.oauthservice.jwt.JwtTokenProvider;
+import com.elianayesol.api.services.oauthservice.kakao.dto.KakaoTokenResponse;
+import com.elianayesol.api.services.oauthservice.kakao.dto.KakaoUserInfo;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.elianayesol.api.oauthservice.jwt.JwtTokenProvider;
-import com.elianayesol.api.oauthservice.kakao.dto.KakaoTokenResponse;
-import com.elianayesol.api.oauthservice.kakao.dto.KakaoUserInfo;
 
 import java.util.HashMap;
 import java.util.Map;

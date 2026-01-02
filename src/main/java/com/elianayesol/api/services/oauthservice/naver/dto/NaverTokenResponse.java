@@ -1,4 +1,4 @@
-package com.elianayesol.api.oauthservice.naver.dto;
+package com.elianayesol.api.services.oauthservice.naver.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

@@ -1,13 +1,14 @@
-package com.elianayesol.api.oauthservice.google;
+package com.elianayesol.api.services.oauthservice.google;
 
-import com.elianayesol.api.oauthservice.google.dto.GoogleTokenResponse;
-import com.elianayesol.api.oauthservice.google.dto.GoogleUserInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import com.elianayesol.api.services.oauthservice.google.dto.GoogleTokenResponse;
+import com.elianayesol.api.services.oauthservice.google.dto.GoogleUserInfo;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

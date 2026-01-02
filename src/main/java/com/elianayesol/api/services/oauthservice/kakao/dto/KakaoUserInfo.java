@@ -1,4 +1,4 @@
-package com.elianayesol.api.oauthservice.kakao.dto;
+package com.elianayesol.api.services.oauthservice.kakao.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

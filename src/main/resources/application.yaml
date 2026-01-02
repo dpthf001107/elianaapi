@@ -6,15 +6,17 @@ spring:
     import: "optional:configserver:"
   
   # Redis 연결 설정 (WebMVC 환경)
+  # Upstash Redis 사용 - .env 파일의 UPSTASH_REDIS_* 값 사용
   data:
     redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      host: ${UPSTASH_REDIS_HOST}
+      port: ${UPSTASH_REDIS_PORT}
+      username: ${UPSTASH_REDIS_USERNAME:default}
+      password: ${UPSTASH_REDIS_PASSWORD}
       timeout: 2000ms
       # SSL 설정 (Upstash 사용 시 필수)
       ssl:
-        enabled: ${REDIS_SSL_ENABLED:false}
+        enabled: ${UPSTASH_REDIS_SSL_ENABLED:true}
 
 # ========================================
 # Server 설정
@@ -61,7 +63,7 @@ springdoc:
   writer-with-order-by-keys: true
 
 # ========================================
-# Google OAuth 설정 (oauthservice 통합)
+# OAuth 설정 (oauthservice 통합)
 # ========================================
 google:
   client-id: ${GOOGLE_CLIENT_ID}
@@ -69,6 +71,18 @@ google:
   redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/api/oauth/google/callback}
   # 로그인 성공 후 이동할 프론트엔드 주소 (www.elianayesol.com)
   frontend-redirect-uri: ${GOOGLE_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/google/callback}
+
+kakao:
+  client-id: ${KAKAO_REST_API_KEY}
+  client-secret: ${KAKAO_CLIENT_SECRET:}
+  redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080/api/oauth/kakao/callback}
+  frontend-redirect-uri: ${KAKAO_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/kakao/callback}
+
+naver:
+  client-id: ${NAVER_CLIENT_ID}
+  client-secret: ${NAVER_CLIENT_SECRET}
+  redirect-uri: ${NAVER_REDIRECT_URI:http://localhost:8080/api/oauth/naver/callback}
+  frontend-redirect-uri: ${NAVER_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/naver/callback}
 
 # ========================================
 # JWT 설정 (oauthservice 통합)
@@ -87,7 +101,7 @@ logging:
     org.springframework.web: INFO
     # 통합된 서비스들 로깅
     com.elianayesol.api: DEBUG
-    com.elianayesol.api.oauthservice: DEBUG
+    com.elianayesol.api.services.oauthservice: DEBUG
     com.elianayesol.api.user: INFO
     com.elianayesol.api.common: INFO
     com.elianayesol.api.environment: INFO
