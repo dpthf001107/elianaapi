@@ -11,40 +11,51 @@
 # - OAuth Service (Google Login + JWT)
 # ========================================
 
-# Build stage
+########## Build Stage ##########
 FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
 
 # 시스템 도구 설치
 RUN apk add --no-cache bash
 
-# Gradle Wrapper 복사
+# Gradle Wrapper & 설정 먼저 복사 (캐시 최적화)
 COPY gradlew .
 COPY gradle gradle
-
-# Gradle 빌드 파일 복사
 COPY build.gradle settings.gradle ./
+
+RUN chmod +x ./gradlew
+
+# 의존성 다운로드 (캐시 효율 개선 - 네트워크 이슈 대비 재시도)
+RUN for i in 1 2 3; do \
+      ./gradlew dependencies --no-daemon && break || sleep 10; \
+    done || true
 
 # 소스 코드 복사
 COPY src src
 
-# 실행 권한 부여
-RUN chmod +x ./gradlew
+# 애플리케이션 빌드 (재시도 포함)
+RUN for i in 1 2 3; do \
+      ./gradlew bootJar --no-daemon && break || sleep 10; \
+    done
 
-# Gradle 빌드 (네트워크 이슈 대비 재시도 로직)
-# Retry Gradle build up to 3 times in case of network issues
-RUN for i in 1 2 3; do ./gradlew bootJar --no-daemon && break || sleep 5; done
-
-# Runtime stage
+########## Runtime Stage ##########
 FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /app
 VOLUME /tmp
 
-# Healthcheck 및 디버깅용 curl 설치 (일부 서비스에서 사용)
+# Healthcheck 및 디버깅용 curl 설치
 RUN apk update && apk add --no-cache curl
 
-# 빌드된 JAR 파일 복사
+# 빌드 결과 복사
 COPY --from=build /app/build/libs/*.jar app.jar
 
-# 애플리케이션 실행
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+# 기본 JVM 옵션 (메모리 안정화)
+ENV JAVA_OPTS="-Xms256m -Xmx768m"
+
+# Spring profile 외부 지정 가능
+ENV SPRING_PROFILES_ACTIVE=production
+
+EXPOSE 8080
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 
