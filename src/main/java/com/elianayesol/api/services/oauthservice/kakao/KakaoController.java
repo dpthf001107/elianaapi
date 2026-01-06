@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.elianayesol.api.services.oauthservice.kakao.KakaoService.OAuthUserResponse;
+import com.elianayesol.api.services.oauthservice.jwt.JwtProperties;
+import com.elianayesol.api.services.oauthservice.token.TokenStorageService;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -18,8 +21,11 @@ import java.util.Map;
 @RequestMapping("/api/oauth/kakao")
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin(origins = {"https://www.elianayesol.com", "https://elianayesol.com", "http://localhost:3000"}, allowCredentials = "true")
 public class KakaoController {
     private final KakaoService kakaoService;
+    private final TokenStorageService tokenStorageService;
+    private final JwtProperties jwtProperties;
     
     @Value("${kakao.client-id:}")
     private String clientId;
@@ -30,8 +36,8 @@ public class KakaoController {
     @Value("${kakao.authorize-uri:https://kauth.kakao.com/oauth/authorize}")
     private String authorizeUri;
     
-    @Value("${kakao.frontend-redirect-uri:http://localhost:3000/oauth/kakao/callback}")
-    private String frontendRedirectUri;
+    @Value("${FRONTEND_URL:https://www.elianayesol.com}")
+    private String frontendUrl;
 
     /**
      * 카카오 로그인 URL 생성
@@ -85,7 +91,8 @@ public class KakaoController {
         // code 파라미터 검증
         if (code == null || code.isEmpty()) {
             log.error("Kakao callback: code parameter is missing");
-            String redirectUrl = UriComponentsBuilder.fromUriString(frontendRedirectUri)
+            String callbackUrl = frontendUrl + "/oauth/kakao/callback";
+            String redirectUrl = UriComponentsBuilder.fromUriString(callbackUrl)
                     .queryParam("error", URLEncoder.encode("인증 코드가 없습니다.", StandardCharsets.UTF_8))
                     .build()
                     .toUriString();
@@ -104,8 +111,26 @@ public class KakaoController {
                 throw new RuntimeException("Failed to generate tokens");
             }
 
+            // 토큰 저장 (Access Token -> Redis, Refresh Token -> DB)
+            String userId = userInfo != null ? userInfo.getId() : null;
+            if (userId != null) {
+                // Access Token을 Upstash Redis에 저장
+                tokenStorageService.saveAccessToken(userId, response.getAccessToken());
+                // Refresh Token을 Neon DB에 저장
+                java.time.LocalDateTime refreshTokenExpiresAt = java.time.LocalDateTime.now()
+                    .plusSeconds(jwtProperties.getRefreshExpiration() / 1000);
+                tokenStorageService.saveRefreshToken(
+                    userId, 
+                    response.getRefreshToken(), 
+                    "kakao",
+                    refreshTokenExpiresAt
+                );
+                log.info("✅ Kakao 로그인 성공 - Access Token (Redis) 및 Refresh Token (DB) 저장 완료: userId={}", userId);
+            }
+
             // 프론트엔드로 리다이렉트하면서 토큰과 사용자 정보를 URL 파라미터로 전달
-            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(frontendRedirectUri)
+            String callbackUrl = frontendUrl + "/oauth/kakao/callback";
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(callbackUrl)
                     .queryParam("accessToken", URLEncoder.encode(response.getAccessToken(), StandardCharsets.UTF_8))
                     .queryParam("refreshToken", URLEncoder.encode(response.getRefreshToken(), StandardCharsets.UTF_8));
 
@@ -142,7 +167,8 @@ public class KakaoController {
             if (errorMessage.length() > 200) {
                 errorMessage = errorMessage.substring(0, 200);
             }
-            String redirectUrl = UriComponentsBuilder.fromUriString(frontendRedirectUri)
+            String callbackUrl = frontendUrl + "/oauth/kakao/callback";
+            String redirectUrl = UriComponentsBuilder.fromUriString(callbackUrl)
                     .queryParam("error", URLEncoder.encode(errorMessage, StandardCharsets.UTF_8))
                     .build()
                     .toUriString();

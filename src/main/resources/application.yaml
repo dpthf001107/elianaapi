@@ -96,14 +96,16 @@ google:
 kakao:
   client-id: ${KAKAO_REST_API_KEY}
   client-secret: ${KAKAO_CLIENT_SECRET:}
-  redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080/api/oauth/kakao/callback}
-  frontend-redirect-uri: ${KAKAO_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/kakao/callback}
+  # 프로덕션 기본값: https://api.elianayesol.com/api/oauth/kakao/callback
+  # 개발 환경에서는 환경 변수 KAKAO_REDIRECT_URI=http://localhost:8080/api/oauth/kakao/callback 설정
+  redirect-uri: ${KAKAO_REDIRECT_URI:https://api.elianayesol.com/api/oauth/kakao/callback}
 
 naver:
   client-id: ${NAVER_CLIENT_ID}
   client-secret: ${NAVER_CLIENT_SECRET}
-  redirect-uri: ${NAVER_REDIRECT_URI:http://localhost:8080/api/oauth/naver/callback}
-  frontend-redirect-uri: ${NAVER_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/naver/callback}
+  # 프로덕션 기본값: https://api.elianayesol.com/api/oauth/naver/callback
+  # 개발 환경에서는 환경 변수 NAVER_REDIRECT_URI=http://localhost:8080/api/oauth/naver/callback 설정
+  redirect-uri: ${NAVER_REDIRECT_URI:https://api.elianayesol.com/api/oauth/naver/callback}
 
 # ========================================
 # JWT 설정 (oauthservice 통합)
