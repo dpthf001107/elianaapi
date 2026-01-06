@@ -30,8 +30,11 @@ public class GoogleController {
 	private final GoogleAuthService googleAuthService;
 	private final JwtTokenProvider jwtTokenProvider;
 
-	@Value("${google.frontend-redirect-uri:http://localhost:3000/oauth/google/callback}")
-	private String frontendRedirectUri;
+	// 프로덕션: FRONTEND_URL=https://www.elianayesol.com (환경 변수)
+	// 개발: FRONTEND_URL=http://localhost:3000 (.env 파일 또는 환경 변수)
+	// 기본값: 환경 변수가 없으면 프로덕션 도메인 사용
+	@Value("${FRONTEND_URL:https://www.elianayesol.com}")
+	private String frontendUrl;
 
 	public GoogleController(GoogleAuthService googleAuthService, JwtTokenProvider jwtTokenProvider) {
 		this.googleAuthService = googleAuthService;
@@ -152,13 +155,14 @@ public class GoogleController {
 			response.setRefreshToken(refreshToken);
 			response.setTokenType("Bearer");
 			response.setExpiresIn(86400000L); // 24시간
-			response.setUser(user);
-			response.setRedirectUrl(frontendRedirectUri); // 백엔드에 설정된 리디렉션 URL
+		response.setUser(user);
+		String callbackUrl = frontendUrl + "/oauth/google/callback";
+		response.setRedirectUrl(callbackUrl); // 프론트엔드 콜백 URL
 
-			System.out.println("\n✅ [Success] Google 로그인 성공!");
-			System.out.println("   - 사용자: " + googleUserInfo.getName() + " (" + googleUserInfo.getEmail() + ")");
-			System.out.println("   - 리디렉션 URL: " + frontendRedirectUri);
-			System.out.println("========================================\n");
+		System.out.println("\n✅ [Success] Google 로그인 성공!");
+		System.out.println("   - 사용자: " + googleUserInfo.getName() + " (" + googleUserInfo.getEmail() + ")");
+		System.out.println("   - 리디렉션 URL: " + callbackUrl);
+		System.out.println("========================================\n");
 
 			return ResponseEntity.ok(response);
 
@@ -192,8 +196,8 @@ public class GoogleController {
 		System.out.println("🔄 [Google Callback] 콜백 요청 수신 (GET)");
 		System.out.println("========================================");
 		
-		// 요청의 Origin을 확인하여 리디렉션 URL 결정
-		String baseUrl = determineFrontendUrl(referer);
+		// 환경 변수에서 프론트엔드 URL 가져오기
+		String baseUrl = frontendUrl;
 		String callbackPath = "/oauth/google/callback";
 		
 		if (error != null) {
@@ -270,17 +274,4 @@ public class GoogleController {
 		}
 	}
 
-	/**
-	 * Referer 헤더를 기반으로 프론트엔드 URL 결정
-	 */
-	private String determineFrontendUrl(String referer) {
-		if (referer != null) {
-			// Referer에서 포트 추출
-			if (referer.contains(":3000")) {
-				return "http://localhost:3000";
-			}
-		}
-		// 기본값은 www.elianayesol.com (포트 3000)
-		return "http://localhost:3000";
-	}
 }
