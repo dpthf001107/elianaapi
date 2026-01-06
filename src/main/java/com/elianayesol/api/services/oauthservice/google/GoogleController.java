@@ -9,6 +9,8 @@ import org.springframework.web.servlet.view.RedirectView;
 import com.elianayesol.api.services.oauthservice.google.dto.GoogleUserInfo;
 import com.elianayesol.api.services.oauthservice.google.dto.LoginResponse;
 import com.elianayesol.api.services.oauthservice.jwt.JwtTokenProvider;
+import com.elianayesol.api.services.oauthservice.jwt.JwtProperties;
+import com.elianayesol.api.services.oauthservice.token.TokenStorageService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,6 +31,8 @@ public class GoogleController {
 
 	private final GoogleAuthService googleAuthService;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final TokenStorageService tokenStorageService;
+	private final JwtProperties jwtProperties;
 
 	// 프로덕션: FRONTEND_URL=https://www.elianayesol.com (환경 변수)
 	// 개발: FRONTEND_URL=http://localhost:3000 (.env 파일 또는 환경 변수)
@@ -36,9 +40,15 @@ public class GoogleController {
 	@Value("${FRONTEND_URL:https://www.elianayesol.com}")
 	private String frontendUrl;
 
-	public GoogleController(GoogleAuthService googleAuthService, JwtTokenProvider jwtTokenProvider) {
+	public GoogleController(
+			GoogleAuthService googleAuthService, 
+			JwtTokenProvider jwtTokenProvider,
+			TokenStorageService tokenStorageService,
+			JwtProperties jwtProperties) {
 		this.googleAuthService = googleAuthService;
 		this.jwtTokenProvider = jwtTokenProvider;
+		this.tokenStorageService = tokenStorageService;
+		this.jwtProperties = jwtProperties;
 	}
 
 	/**
@@ -136,6 +146,21 @@ public class GoogleController {
 			System.out.println("   - Access Token (일부): " + jwtToken.substring(0, Math.min(50, jwtToken.length())) + "...");
 			System.out.println("   - Refresh Token (전체): " + refreshToken);
 			System.out.println("   - Refresh Token (일부): " + refreshToken.substring(0, Math.min(50, refreshToken.length())) + "...");
+
+			// 4-1. 토큰 저장
+			System.out.println("\n🔄 [Step 4-1] 토큰 저장 중..");
+			// Access Token을 Upstash Redis에 저장
+			tokenStorageService.saveAccessToken(googleUserInfo.getId(), jwtToken);
+			// Refresh Token을 Neon DB에 저장
+			java.time.LocalDateTime refreshTokenExpiresAt = java.time.LocalDateTime.now()
+				.plusSeconds(jwtProperties.getRefreshExpiration() / 1000);
+			tokenStorageService.saveRefreshToken(
+				googleUserInfo.getId(), 
+				refreshToken, 
+				"google", 
+				refreshTokenExpiresAt
+			);
+			System.out.println("✅ [Step 4-1] 토큰 저장 완료");
 
 			// 5. 사용자 정보 맵 생성
 			Map<String, Object> user = new HashMap<>();
@@ -244,6 +269,21 @@ public class GoogleController {
 			System.out.println("   - Access Token (일부): " + jwtToken.substring(0, Math.min(50, jwtToken.length())) + "...");
 			System.out.println("   - Refresh Token (전체): " + refreshToken);
 			System.out.println("   - Refresh Token (일부): " + refreshToken.substring(0, Math.min(50, refreshToken.length())) + "...");
+
+			// 3-1. 토큰 저장
+			System.out.println("\n🔄 [Step 3-1] 토큰 저장 중..");
+			// Access Token을 Upstash Redis에 저장
+			tokenStorageService.saveAccessToken(googleUserInfo.getId(), jwtToken);
+			// Refresh Token을 Neon DB에 저장
+			java.time.LocalDateTime refreshTokenExpiresAt = java.time.LocalDateTime.now()
+				.plusSeconds(jwtProperties.getRefreshExpiration() / 1000);
+			tokenStorageService.saveRefreshToken(
+				googleUserInfo.getId(), 
+				refreshToken, 
+				"google", 
+				refreshTokenExpiresAt
+			);
+			System.out.println("✅ [Step 3-1] 토큰 저장 완료");
 
 			// 토큰을 쿼리 파라미터로 전달하여 콜백 페이지로 리디렉션
 			// 콜백 페이지에서 토큰을 받아 localStorage에 저장하고 성공 페이지 표시
