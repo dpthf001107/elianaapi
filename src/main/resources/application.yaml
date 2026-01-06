@@ -68,9 +68,13 @@ springdoc:
 google:
   client-id: ${GOOGLE_CLIENT_ID}
   client-secret: ${GOOGLE_CLIENT_SECRET}
-  redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/api/oauth/google/callback}
+  # 프로덕션 기본값: https://api.elianayesol.com/api/oauth/google/callback
+  # 개발 환경에서는 환경 변수 GOOGLE_REDIRECT_URI=http://localhost:8080/api/oauth/google/callback 설정
+  redirect-uri: ${GOOGLE_REDIRECT_URI:https://api.elianayesol.com/api/oauth/google/callback}
   # 로그인 성공 후 이동할 프론트엔드 주소 (www.elianayesol.com)
-  frontend-redirect-uri: ${GOOGLE_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/google/callback}
+  # 프로덕션 기본값: https://www.elianayesol.com/oauth/google/callback
+  # 개발 환경에서는 환경 변수 GOOGLE_FRONTEND_REDIRECT_URI=http://localhost:3000/oauth/google/callback 설정
+  frontend-redirect-uri: ${GOOGLE_FRONTEND_REDIRECT_URI:https://www.elianayesol.com/oauth/google/callback}
 
 kakao:
   client-id: ${KAKAO_REST_API_KEY}
