@@ -21,8 +21,8 @@ spring:
   # PostgreSQL 연결 설정 (Neon DB)
   # Refresh Token 저장용
   datasource:
-    url: ${NEON_DB_URL:jdbc:postgresql://localhost:5432/elianayesol}
-    username: ${NEON_DB_USERNAME:postgres}
+    url: jdbc:postgresql://${NEON_DB_HOST:localhost:5432}/${NEON_DB_NAME:elianayesol}?sslmode=require
+    username: ${NEON_DB_USER:postgres}
     password: ${NEON_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   
