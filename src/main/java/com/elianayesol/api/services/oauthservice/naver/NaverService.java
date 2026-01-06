@@ -151,7 +151,7 @@ public class NaverService {
         if (name != null) {
             claims.put("name", name);
         }
-        String jwtAccessToken = jwtTokenProvider.generateToken(naverId, claims);
+        String jwtAccessToken = jwtTokenProvider.generateAccessToken(naverId, claims);
         String jwtRefreshToken = jwtTokenProvider.generateRefreshToken(naverId);
 
         // 5. 응답 생성

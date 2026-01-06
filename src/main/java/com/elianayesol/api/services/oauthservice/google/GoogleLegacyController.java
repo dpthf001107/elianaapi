@@ -90,7 +90,7 @@ public class GoogleLegacyController {
 			claims.put("email", googleUserInfo.getEmail());
 			claims.put("name", googleUserInfo.getName());
 
-			String jwtToken = jwtTokenProvider.generateToken(googleUserInfo.getId(), claims);
+			String jwtToken = jwtTokenProvider.generateAccessToken(googleUserInfo.getId(), claims);
 			String refreshToken = jwtTokenProvider.generateRefreshToken(googleUserInfo.getId());
 			System.out.println("✅ [Step 3] JWT token generated successfully");
 

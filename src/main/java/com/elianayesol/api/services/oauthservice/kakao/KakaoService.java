@@ -151,7 +151,7 @@ public class KakaoService {
         if (email != null) {
             claims.put("email", email);
         }
-        String jwtAccessToken = jwtTokenProvider.generateToken(kakaoId, claims);
+        String jwtAccessToken = jwtTokenProvider.generateAccessToken(kakaoId, claims);
         String jwtRefreshToken = jwtTokenProvider.generateRefreshToken(kakaoId);
 
         // 5. 응답 생성

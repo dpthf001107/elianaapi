@@ -23,9 +23,9 @@ public class JwtTokenProvider {
 	}
 
 	/**
-	 * Generate JWT Token
+	 * Generate Access Token (JWT Token)
 	 */
-	public String generateToken(String subject, Map<String, Object> claims) {
+	public String generateAccessToken(String subject, Map<String, Object> claims) {
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime() + jwtProperties.getExpiration());
 
