@@ -138,8 +138,9 @@ public class NaverController {
             // 프론트엔드로 리다이렉트하면서 토큰과 사용자 정보를 URL 파라미터로 전달
             String callbackUrl = frontendUrl + "/oauth/naver/callback";
             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(callbackUrl)
-                    .queryParam("accessToken", URLEncoder.encode(response.getAccessToken(), StandardCharsets.UTF_8))
-                    .queryParam("refreshToken", URLEncoder.encode(response.getRefreshToken(), StandardCharsets.UTF_8));
+                    .queryParam("token", URLEncoder.encode(response.getAccessToken(), StandardCharsets.UTF_8))
+                    .queryParam("refreshToken", URLEncoder.encode(response.getRefreshToken(), StandardCharsets.UTF_8))
+                    .queryParam("success", "true");
 
             // 사용자 정보를 개별 파라미터로 전달
             if (userInfo != null) {
