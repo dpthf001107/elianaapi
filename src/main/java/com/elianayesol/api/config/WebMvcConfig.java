@@ -10,7 +10,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		registry.addMapping("/**")
-				.allowedOrigins(
+				// Spring Boot 3.x에서는 allowedOriginPatterns 사용 권장
+				.allowedOriginPatterns(
 					"http://localhost:3000", 
 					"http://127.0.0.1:3000",
 					"https://www.elianayesol.com",  // 프로덕션 도메인

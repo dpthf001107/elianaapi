@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.elianayesol.api.services.oauthservice.google.dto.GoogleUserInfo;
 import com.elianayesol.api.services.oauthservice.google.dto.LoginResponse;
@@ -27,6 +28,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/oauth/google")
 @Tag(name = "Google OAuth", description = "Google OAuth 인증 API")
+@CrossOrigin(origins = {"https://www.elianayesol.com", "https://elianayesol.com", "http://localhost:3000"}, allowCredentials = "true")
 public class GoogleController {
 
 	private final GoogleAuthService googleAuthService;
