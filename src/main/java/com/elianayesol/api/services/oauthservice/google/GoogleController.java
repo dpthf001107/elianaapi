@@ -197,14 +197,14 @@ public class GoogleController {
 		String callbackPath = "/oauth/google/callback";
 		
 		if (error != null) {
-			System.out.println("❌[Error] Google 로그인 실패: " + error);
+			System.out.println("❌❌[Error] Google 로그인 실패: " + error);
 			System.out.println("========================================\n");
 			// 에러 시 프론트엔드 메인 페이지로 리디렉션
 			return new RedirectView(baseUrl + "/?error=" + URLEncoder.encode(error, StandardCharsets.UTF_8));
 		}
 
 		if (code == null || code.isEmpty()) {
-			System.out.println("❌[Error] 인가 코드가 없습니다.");
+			System.out.println("❌❌[Error] 인가 코드가 없습니다.");
 			System.out.println("========================================\n");
 			// 에러 시 프론트엔드 메인 페이지로 리디렉션
 			return new RedirectView(baseUrl + "/?error=" + URLEncoder.encode("인가 코드가 필요합니다", StandardCharsets.UTF_8));
